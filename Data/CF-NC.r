@@ -20,7 +20,7 @@ nrow(wine[!complete.cases(wine),])/nrow(wine)
 nrow(wine[complete.cases(wine[c('description','designation', 'taster_name', 'points', 'price','variety', 'country', 'province')]),])/nrow(wine)
 
 # Cleaned up df
-wine_clean <- wine[complete.cases(wine[c('description','designation', 'taster_name', 'points', 'price','variety', 'country', 'province')]),]
+wine_clean <- wine[complete.cases(wine[c('X','description','designation', 'taster_name', 'points', 'price','variety', 'country', 'province')]),]
 
 dim(wine)
 
@@ -46,7 +46,7 @@ sum(is.na(wine_clean$price))
 sum(!complete.cases(wine_clean$designation))
 
 #pre-processing
-wine_clean %>%
+wine_clean <- wine_clean %>%
     #convert taster_twitter_handle and taster_name to factor
     mutate(taster_twitter_handle = as.factor(taster_twitter_handle)) %>%
     mutate(taster_name = as.factor(taster_name)) %>%
@@ -55,6 +55,8 @@ wine_clean %>%
     mutate(winery = as.factor(winery)) %>%
     #convert country as factor
     mutate(country = as.factor(country))
+
+head(wine_clean)
 
 wine_clean %>%
     group_by(taster_name) %>%
@@ -75,28 +77,31 @@ wine_clean %>%
 
 # review count for each wine designation
 wine_clean %>%
-    group_by(designation) %>%
+    group_by(title) %>%
     summarize(rev_count = n()) %>%
     filter(rev_count > 100) %>%
     arrange(-rev_count) %>%
-    ggplot(aes(x = reorder(as.factor(designation),rev_count), y = rev_count)) + geom_bar(stat = 'identity') + coord_flip() +
+    ggplot(aes(x = reorder(as.factor(title),rev_count), y = rev_count)) + geom_bar(stat = 'identity') + coord_flip() +
     labs(x = 'Wine Variety', 
          y = 'Review Count', 
          title = "Review Count for Wine")
 
+# number of unique product
+length(unique(wine_clean$title))
+
 wine_clean$title[1]
 
-#number of unique wine product
+#number of unique designation
 length(unique(wine_clean$designation))
 
 #Item Based Collaborative Filtering
 
 # will be using taster_twitter_handler as userid, designation as item, points as the rating
-wine_cf <- wine_clean[,c('X', 'taster_name', 'designation', 'points')]
+wine_cf <- wine_clean[,c('X', 'taster_name', 'title', 'points')]
 
 head(wine_cf)
 
-wine_cf_matrix <- dcast(wine_cf, taster_name ~ designation, fun.aggregate = mean,value.var = 'points',fill=0)
+wine_cf_matrix <- dcast(wine_cf, taster_name ~ title, fun.aggregate = mean,value.var = 'points',fill=0)
 
 rownames(wine_cf_matrix) = wine_cf_matrix[,1]
 
@@ -104,7 +109,10 @@ wine_cf_matrix[,1] = NULL
 
 dim(wine_cf_matrix)
 
-wine_cf[(wine_cf$taster_name == 'Michael Schachner'& wine_cf$designation == '347 Vineyards'),]
+#wine_cf[(wine_cf$taster_name == 'Michael Schachner'& wine_cf$designation == '347 Vineyards'),]
+
+# designation is not the product
+wine_clean[(wine_clean$taster_name == 'Michael Schachner'& wine_clean$designation == '347 Vineyards'),]
 
 wine_cf_matrix[1:19,250:300]
 
