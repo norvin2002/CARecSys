@@ -16,6 +16,7 @@ library(ggplot2)
 
 # ! Set your working directory
 setwd("C:/Users/zamsg/Documents/GitHub/CARecSys/Data")
+#setwd('C:/Users/nchandra/OneDrive - National University of Singapore/CARecSys/Data')
 
 # Read in data
 hotels <- read.csv("Booking.csv", stringsAsFactor=FALSE)
@@ -54,3 +55,5 @@ hotels %>%
   labs(x = "hotel_name", title = "Overall Score for Singapore Hotels in Little India") +
   coord_flip()
 # can explore over scores;clean_score, comfort_score, loc_score, facilities_score, staff_score, value_score, wifi_score
+
+hotels[1,]
